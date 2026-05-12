@@ -1,4 +1,5 @@
 import CodexBarCore
+import AppKit
 import SwiftUI
 
 @MainActor
@@ -88,6 +89,54 @@ struct DisplayPane: View {
                     .opacity(
                         self.settings.menuBarShowsBrandIconWithPercent
                             && self.settings.menuBarDisplayMode == .wideProgress ? 1 : 0.5)
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L("wide_progress_percent_size_title"))
+                                .font(.body)
+                            Text(L("wide_progress_percent_size_subtitle"))
+                                .font(.footnote)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        HStack(spacing: 8) {
+                            Slider(
+                                value: self.$settings.menuBarWideProgressPercentFontSize,
+                                in: 6...9.5,
+                                step: 0.5)
+                                .frame(width: 120)
+                            Text(String(format: "%.1f pt", self.settings.menuBarWideProgressPercentFontSize))
+                                .font(.footnote.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                                .frame(width: 44, alignment: .trailing)
+                        }
+                    }
+                    .disabled(
+                        !self.settings.menuBarShowsBrandIconWithPercent
+                            || self.settings.menuBarDisplayMode != .wideProgress)
+                    .opacity(
+                        self.settings.menuBarShowsBrandIconWithPercent
+                            && self.settings.menuBarDisplayMode == .wideProgress ? 1 : 0.5)
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L("wide_progress_bar_color_title"))
+                                .font(.body)
+                            Text(L("wide_progress_bar_color_subtitle"))
+                                .font(.footnote)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        ColorPicker(
+                            L("wide_progress_bar_color_title"),
+                            selection: self.wideProgressBarColorBinding,
+                            supportsOpacity: false)
+                            .labelsHidden()
+                    }
+                    .disabled(
+                        !self.settings.menuBarShowsBrandIconWithPercent
+                            || self.settings.menuBarDisplayMode != .wideProgress)
+                    .opacity(
+                        self.settings.menuBarShowsBrandIconWithPercent
+                            && self.settings.menuBarDisplayMode == .wideProgress ? 1 : 0.5)
                 }
 
                 Divider()
@@ -150,6 +199,35 @@ struct DisplayPane: View {
                 self.reconcileOverviewSelection()
             }
         }
+    }
+
+    private var wideProgressBarColorBinding: Binding<Color> {
+        Binding(
+            get: {
+                Color(nsColor: Self.nsColor(hex: self.settings.menuBarWideProgressBarColorHex) ?? .darkGray)
+            },
+            set: { color in
+                self.settings.menuBarWideProgressBarColorHex = Self.hexString(from: NSColor(color))
+            })
+    }
+
+    private static func nsColor(hex: String) -> NSColor? {
+        let sanitized = SettingsStore.sanitizedMenuBarWideProgressBarColorHex(hex)
+        let start = sanitized.index(after: sanitized.startIndex)
+        guard let value = Int(sanitized[start...], radix: 16) else { return nil }
+        return NSColor(
+            calibratedRed: CGFloat((value >> 16) & 0xFF) / 255,
+            green: CGFloat((value >> 8) & 0xFF) / 255,
+            blue: CGFloat(value & 0xFF) / 255,
+            alpha: 1)
+    }
+
+    private static func hexString(from color: NSColor) -> String {
+        let resolved = color.usingColorSpace(.sRGB) ?? color
+        let red = min(255, max(0, Int((resolved.redComponent * 255).rounded())))
+        let green = min(255, max(0, Int((resolved.greenComponent * 255).rounded())))
+        let blue = min(255, max(0, Int((resolved.blueComponent * 255).rounded())))
+        return String(format: "#%02X%02X%02X", red, green, blue)
     }
 
     private var overviewProviderSelector: some View {

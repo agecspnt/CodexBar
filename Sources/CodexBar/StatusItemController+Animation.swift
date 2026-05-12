@@ -323,6 +323,8 @@ extension StatusItemController {
                     weeklyWindow: wideProgress.weeklyWindow,
                     paceText: wideProgress.paceText,
                     percentGap: self.settings.menuBarWideProgressPercentGap,
+                    percentFontSize: self.settings.menuBarWideProgressPercentFontSize,
+                    barColorHex: self.settings.menuBarWideProgressBarColorHex,
                     showUsed: showUsed,
                     statusIndicator: statusIndicator)
                 let signature = [
@@ -332,6 +334,8 @@ extension StatusItemController {
                     "weekly=\(debugDouble(wideProgress.weeklyWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
                     "pace=\(wideProgress.paceText ?? "nil")",
                     "gap=\(self.settings.menuBarWideProgressPercentGap)",
+                    "font=\(self.settings.menuBarWideProgressPercentFontSize)",
+                    "barColor=\(self.settings.menuBarWideProgressBarColorHex)",
                     "showUsed=\(showUsed ? "1" : "0")",
                     "status=\(statusIndicator.rawValue)",
                     "warningFlash=\(warningFlash ? "1" : "0")",
@@ -450,6 +454,8 @@ extension StatusItemController {
                     weeklyWindow: wideProgress.weeklyWindow,
                     paceText: wideProgress.paceText,
                     percentGap: self.settings.menuBarWideProgressPercentGap,
+                    percentFontSize: self.settings.menuBarWideProgressPercentFontSize,
+                    barColorHex: self.settings.menuBarWideProgressBarColorHex,
                     showUsed: showUsed,
                     statusIndicator: self.store.statusIndicator(for: provider))
                 self.setButtonImage(warningFlash ? Self.quotaWarningFlashImage(base: image) : image, for: button)
@@ -579,12 +585,15 @@ extension StatusItemController {
         sessionWindow: RateWindow?,
         weeklyWindow: RateWindow?,
         paceText: String? = nil,
-        percentGap: Double = 2,
+        percentGap: Double = 0.5,
+        percentFontSize: Double = 9.5,
+        barColorHex: String = "#333333",
         showUsed: Bool,
         statusIndicator: ProviderStatusIndicator = .none)
         -> NSImage
     {
-        let percentWidth: CGFloat = 30
+        let fontSize = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentFontSize(percentFontSize))
+        let percentWidth = max(CGFloat(34), ceil(fontSize * 3.8))
         let gap = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentGap(percentGap))
         let size = NSSize(width: 22 + 76 + gap + percentWidth + 1, height: 18)
         let image = NSImage(size: size)
@@ -601,12 +610,7 @@ extension StatusItemController {
             iconRect.fill(using: .sourceIn)
         }
 
-        let color = ProviderDescriptorRegistry.descriptor(for: provider).branding.color
-        let fillColor = NSColor(
-            calibratedRed: CGFloat(color.red),
-            green: CGFloat(color.green),
-            blue: CGFloat(color.blue),
-            alpha: 1)
+        let fillColor = self.wideProgressBarColor(hex: barColorHex)
         let topRect = NSRect(x: 22, y: 10, width: 76, height: 6)
         let bottomRect = NSRect(x: 22, y: 2, width: 76, height: 6)
         let topPercentRect = NSRect(x: topRect.maxX + gap, y: 8, width: percentWidth, height: 10)
@@ -630,11 +634,13 @@ extension StatusItemController {
         self.drawWideProgressPercent(
             rect: topPercentRect,
             window: sessionWindow,
-            showUsed: showUsed)
+            showUsed: showUsed,
+            fontSize: fontSize)
         self.drawWideProgressPercent(
             rect: bottomPercentRect,
             window: weeklyWindow,
-            showUsed: showUsed)
+            showUsed: showUsed,
+            fontSize: fontSize)
 
         if statusIndicator.hasIssue {
             NSColor.systemRed.setFill()
@@ -687,16 +693,32 @@ extension StatusItemController {
         label.draw(in: labelRect, withAttributes: attributes)
     }
 
-    private static func drawWideProgressPercent(rect: NSRect, window: RateWindow?, showUsed: Bool) {
+    private static func drawWideProgressPercent(
+        rect: NSRect,
+        window: RateWindow?,
+        showUsed: Bool,
+        fontSize: CGFloat)
+    {
         guard let label = MenuBarDisplayText.percentText(window: window, showUsed: showUsed) else { return }
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .right
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.monospacedDigitSystemFont(ofSize: 7.5, weight: .semibold),
+            .font: NSFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .semibold),
             .foregroundColor: NSColor.labelColor.withAlphaComponent(0.94),
             .paragraphStyle: paragraph,
         ]
         label.draw(in: rect, withAttributes: attributes)
+    }
+
+    private static func wideProgressBarColor(hex: String) -> NSColor {
+        let sanitized = SettingsStore.sanitizedMenuBarWideProgressBarColorHex(hex)
+        let start = sanitized.index(after: sanitized.startIndex)
+        guard let value = Int(sanitized[start...], radix: 16) else { return .darkGray }
+        return NSColor(
+            calibratedRed: CGFloat((value >> 16) & 0xFF) / 255,
+            green: CGFloat((value >> 8) & 0xFF) / 255,
+            blue: CGFloat(value & 0xFF) / 255,
+            alpha: 1)
     }
 
     private func setButtonImage(_ image: NSImage, for button: NSStatusBarButton) {

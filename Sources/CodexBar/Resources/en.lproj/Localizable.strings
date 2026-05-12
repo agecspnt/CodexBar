@@ -481,6 +481,10 @@
 "display_mode_subtitle" = "Choose what to show in the menu bar (Pace shows usage vs. expected).";
 "wide_progress_gap_title" = "Wide progress gap";
 "wide_progress_gap_subtitle" = "Adjust spacing between the progress bars and their percentages.";
+"wide_progress_percent_size_title" = "Percentage size";
+"wide_progress_percent_size_subtitle" = "Adjust the right-side percentage text size.";
+"wide_progress_bar_color_title" = "Progress bar color";
+"wide_progress_bar_color_subtitle" = "Choose the fill color for the wide progress bars.";
 "section_menu_content" = "Menu content";
 "show_usage_as_used_title" = "Show usage as used";
 "show_usage_as_used_subtitle" = "Progress bars fill as you consume quota (instead of showing remaining).";

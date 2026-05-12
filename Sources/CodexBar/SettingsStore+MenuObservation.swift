@@ -22,6 +22,8 @@ extension SettingsStore {
         _ = self.menuBarShowsHighestUsage
         _ = self.menuBarDisplayMode
         _ = self.menuBarWideProgressPercentGap
+        _ = self.menuBarWideProgressPercentFontSize
+        _ = self.menuBarWideProgressBarColorHex
         _ = self.historicalTrackingEnabled
         _ = self.multiAccountMenuLayout
         _ = self.menuBarMetricPreferencesRaw

@@ -21,6 +21,8 @@ struct SettingsDefaultsState {
     var menuBarShowsBrandIconWithPercent: Bool
     var menuBarDisplayModeRaw: String?
     var menuBarWideProgressPercentGap: Double
+    var menuBarWideProgressPercentFontSize: Double
+    var menuBarWideProgressBarColorHex: String
     var historicalTrackingEnabled: Bool
     var multiAccountMenuLayoutRaw: String
     var menuBarMetricPreferencesRaw: [String: String]

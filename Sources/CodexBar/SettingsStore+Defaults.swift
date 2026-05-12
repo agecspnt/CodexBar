@@ -202,6 +202,40 @@ extension SettingsStore {
         min(2, max(0.1, value))
     }
 
+    var menuBarWideProgressPercentFontSize: Double {
+        get { self.defaultsState.menuBarWideProgressPercentFontSize }
+        set {
+            let sanitized = Self.sanitizedMenuBarWideProgressPercentFontSize(newValue)
+            self.defaultsState.menuBarWideProgressPercentFontSize = sanitized
+            self.userDefaults.set(sanitized, forKey: "menuBarWideProgressPercentFontSize")
+        }
+    }
+
+    static func sanitizedMenuBarWideProgressPercentFontSize(_ value: Double) -> Double {
+        min(9.5, max(6, value))
+    }
+
+    var menuBarWideProgressBarColorHex: String {
+        get { self.defaultsState.menuBarWideProgressBarColorHex }
+        set {
+            let sanitized = Self.sanitizedMenuBarWideProgressBarColorHex(newValue)
+            self.defaultsState.menuBarWideProgressBarColorHex = sanitized
+            self.userDefaults.set(sanitized, forKey: "menuBarWideProgressBarColorHex")
+        }
+    }
+
+    static func sanitizedMenuBarWideProgressBarColorHex(_ value: String?) -> String {
+        let fallback = "#333333"
+        guard let raw = value?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
+            return fallback
+        }
+        let hex = raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
+        guard hex.count == 6, hex.allSatisfy(\.isHexDigit) else {
+            return fallback
+        }
+        return "#\(hex.uppercased())"
+    }
+
     var multiAccountMenuLayout: MultiAccountMenuLayout {
         get { MultiAccountMenuLayout(rawValue: self.defaultsState.multiAccountMenuLayoutRaw) ?? .segmented }
         set {

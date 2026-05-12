@@ -488,6 +488,10 @@
 "display_mode_subtitle" = "选择在菜单栏中显示的内容（节奏显示用量与预期的对比）。";
 "wide_progress_gap_title" = "宽进度条间距";
 "wide_progress_gap_subtitle" = "调整进度条和右侧百分比之间的间距。";
+"wide_progress_percent_size_title" = "百分比字号";
+"wide_progress_percent_size_subtitle" = "调整右侧百分比文字大小。";
+"wide_progress_bar_color_title" = "进度条颜色";
+"wide_progress_bar_color_subtitle" = "选择宽进度条的填充颜色。";
 "section_menu_content" = "菜单内容";
 "show_usage_as_used_title" = "显示已使用用量";
 "show_usage_as_used_subtitle" = "进度条随用量消耗而填充（而非显示剩余量）。";

@@ -297,6 +297,12 @@ extension SettingsStore {
         let rawWideProgressPercentGap = userDefaults.object(forKey: "menuBarWideProgressPercentGap") as? Double
         let menuBarWideProgressPercentGap = Self.sanitizedMenuBarWideProgressPercentGap(
             rawWideProgressPercentGap ?? 0.5)
+        let rawWideProgressPercentFontSize = userDefaults.object(
+            forKey: "menuBarWideProgressPercentFontSize") as? Double
+        let menuBarWideProgressPercentFontSize = Self.sanitizedMenuBarWideProgressPercentFontSize(
+            rawWideProgressPercentFontSize ?? 9.5)
+        let menuBarWideProgressBarColorHex = Self.sanitizedMenuBarWideProgressBarColorHex(
+            userDefaults.string(forKey: "menuBarWideProgressBarColorHex"))
         let historicalTrackingEnabled = userDefaults.object(forKey: "historicalTrackingEnabled") as? Bool ?? false
         let multiAccountMenuLayoutRaw = userDefaults.string(forKey: "multiAccountMenuLayout") ?? {
             let legacyShowAll = userDefaults.object(forKey: "showAllTokenAccountsInMenu") as? Bool ?? false
@@ -373,6 +379,8 @@ extension SettingsStore {
             menuBarShowsBrandIconWithPercent: menuBarShowsBrandIconWithPercent,
             menuBarDisplayModeRaw: menuBarDisplayModeRaw,
             menuBarWideProgressPercentGap: menuBarWideProgressPercentGap,
+            menuBarWideProgressPercentFontSize: menuBarWideProgressPercentFontSize,
+            menuBarWideProgressBarColorHex: menuBarWideProgressBarColorHex,
             historicalTrackingEnabled: historicalTrackingEnabled,
             multiAccountMenuLayoutRaw: multiAccountMenuLayoutRaw,
             menuBarMetricPreferencesRaw: resolvedPreferences,
