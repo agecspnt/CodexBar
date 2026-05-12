@@ -906,8 +906,10 @@ struct StatusItemAnimationTests {
             provider: .codex,
             sessionWindow: RateWindow(usedPercent: 40, windowMinutes: 300, resetsAt: nil, resetDescription: nil),
             weeklyWindow: RateWindow(usedPercent: 62, windowMinutes: 7 * 24 * 60, resetsAt: nil, resetDescription: nil),
-            pacePercent: 48,
-            paceOnTop: false,
+            sessionPacePercent: 35,
+            sessionPaceOnTop: false,
+            weeklyPacePercent: 48,
+            weeklyPaceOnTop: false,
             showUsed: true)
 
         #expect(image.size.width > 100)

@@ -321,8 +321,10 @@ extension StatusItemController {
                     provider: primaryProvider,
                     sessionWindow: wideProgress.sessionWindow,
                     weeklyWindow: wideProgress.weeklyWindow,
-                    pacePercent: wideProgress.pacePercent,
-                    paceOnTop: wideProgress.paceOnTop,
+                    sessionPacePercent: wideProgress.sessionPacePercent,
+                    sessionPaceOnTop: wideProgress.sessionPaceOnTop,
+                    weeklyPacePercent: wideProgress.weeklyPacePercent,
+                    weeklyPaceOnTop: wideProgress.weeklyPaceOnTop,
                     percentGap: self.settings.menuBarWideProgressPercentGap,
                     percentFontSize: self.settings.menuBarWideProgressPercentFontSize,
                     barColorHex: self.settings.menuBarWideProgressBarColorHex,
@@ -333,8 +335,10 @@ extension StatusItemController {
                     "provider=\(primaryProvider.rawValue)",
                     "session=\(debugDouble(wideProgress.sessionWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
                     "weekly=\(debugDouble(wideProgress.weeklyWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
-                    "pace=\(debugDouble(wideProgress.pacePercent))",
-                    "paceOnTop=\(wideProgress.paceOnTop.map { $0 ? "1" : "0" } ?? "nil")",
+                    "sessionPace=\(debugDouble(wideProgress.sessionPacePercent))",
+                    "sessionPaceOnTop=\(wideProgress.sessionPaceOnTop.map { $0 ? "1" : "0" } ?? "nil")",
+                    "weeklyPace=\(debugDouble(wideProgress.weeklyPacePercent))",
+                    "weeklyPaceOnTop=\(wideProgress.weeklyPaceOnTop.map { $0 ? "1" : "0" } ?? "nil")",
                     "gap=\(self.settings.menuBarWideProgressPercentGap)",
                     "font=\(self.settings.menuBarWideProgressPercentFontSize)",
                     "barColor=\(self.settings.menuBarWideProgressBarColorHex)",
@@ -454,8 +458,10 @@ extension StatusItemController {
                     provider: provider,
                     sessionWindow: wideProgress.sessionWindow,
                     weeklyWindow: wideProgress.weeklyWindow,
-                    pacePercent: wideProgress.pacePercent,
-                    paceOnTop: wideProgress.paceOnTop,
+                    sessionPacePercent: wideProgress.sessionPacePercent,
+                    sessionPaceOnTop: wideProgress.sessionPaceOnTop,
+                    weeklyPacePercent: wideProgress.weeklyPacePercent,
+                    weeklyPaceOnTop: wideProgress.weeklyPaceOnTop,
                     percentGap: self.settings.menuBarWideProgressPercentGap,
                     percentFontSize: self.settings.menuBarWideProgressPercentFontSize,
                     barColorHex: self.settings.menuBarWideProgressBarColorHex,
@@ -587,8 +593,10 @@ extension StatusItemController {
         provider: UsageProvider,
         sessionWindow: RateWindow?,
         weeklyWindow: RateWindow?,
-        pacePercent: Double? = nil,
-        paceOnTop: Bool? = nil,
+        sessionPacePercent: Double? = nil,
+        sessionPaceOnTop: Bool? = nil,
+        weeklyPacePercent: Double? = nil,
+        weeklyPaceOnTop: Bool? = nil,
         percentGap: Double = 0.1,
         percentFontSize: Double = 10,
         barColorHex: String = "#333333",
@@ -635,8 +643,8 @@ extension StatusItemController {
             label: "5h",
             labelAlignment: .left,
             labelColor: .white,
-            pacePercent: nil,
-            paceOnTop: nil,
+            pacePercent: sessionPacePercent,
+            paceOnTop: sessionPaceOnTop,
             markerColor: nil)
         self.drawWideProgressBar(
             rect: bottomRect,
@@ -647,8 +655,8 @@ extension StatusItemController {
             label: nil,
             labelAlignment: .center,
             labelColor: .white,
-            pacePercent: pacePercent,
-            paceOnTop: paceOnTop,
+            pacePercent: weeklyPacePercent,
+            paceOnTop: weeklyPaceOnTop,
             markerColor: nil)
         self.drawWideProgressPercent(
             rect: topPercentRect,
@@ -919,7 +927,13 @@ extension StatusItemController {
     private func menuBarWideProgressModel(
         for provider: UsageProvider,
         snapshot: UsageSnapshot?)
-        -> (sessionWindow: RateWindow?, weeklyWindow: RateWindow?, pacePercent: Double?, paceOnTop: Bool?)
+        -> (
+            sessionWindow: RateWindow?,
+            weeklyWindow: RateWindow?,
+            sessionPacePercent: Double?,
+            sessionPaceOnTop: Bool?,
+            weeklyPacePercent: Double?,
+            weeklyPaceOnTop: Bool?)
     {
         let now = snapshot?.updatedAt ?? Date()
         let codexProjection = self.store.codexConsumerProjectionIfNeeded(
@@ -936,7 +950,14 @@ extension StatusItemController {
         let pace = weeklyWindow.flatMap { window in
             self.store.weeklyPace(provider: provider, window: window, now: now)
         }
-        let paceDetail = weeklyWindow.flatMap { window in
+        let sessionPaceDetail = sessionWindow.flatMap { window in
+            UsageMenuCardView.Model.sessionPaceDetail(
+                provider: provider,
+                window: window,
+                now: now,
+                showUsed: self.settings.usageBarsShowUsed)
+        }
+        let weeklyPaceDetail = weeklyWindow.flatMap { window in
             UsageMenuCardView.Model.weeklyPaceDetail(
                 window: window,
                 now: now,
@@ -946,8 +967,10 @@ extension StatusItemController {
         return (
             sessionWindow: sessionWindow,
             weeklyWindow: weeklyWindow,
-            pacePercent: paceDetail?.pacePercent,
-            paceOnTop: paceDetail?.paceOnTop)
+            sessionPacePercent: sessionPaceDetail?.pacePercent,
+            sessionPaceOnTop: sessionPaceDetail?.paceOnTop,
+            weeklyPacePercent: weeklyPaceDetail?.pacePercent,
+            weeklyPaceOnTop: weeklyPaceDetail?.paceOnTop)
     }
 
     private func primaryProviderForUnifiedIcon() -> UsageProvider {
