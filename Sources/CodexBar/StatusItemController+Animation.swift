@@ -586,16 +586,16 @@ extension StatusItemController {
         weeklyWindow: RateWindow?,
         paceText: String? = nil,
         percentGap: Double = 0.5,
-        percentFontSize: Double = 9.5,
+        percentFontSize: Double = 11.5,
         barColorHex: String = "#333333",
         showUsed: Bool,
         statusIndicator: ProviderStatusIndicator = .none)
         -> NSImage
     {
         let fontSize = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentFontSize(percentFontSize))
-        let percentWidth = max(CGFloat(34), ceil(fontSize * 3.8))
+        let percentWidth = max(CGFloat(34), ceil(fontSize * 3.9))
         let gap = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentGap(percentGap))
-        let size = NSSize(width: 22 + 76 + gap + percentWidth + 1, height: 18)
+        let size = NSSize(width: 22 + 76 + gap + percentWidth + 1, height: 22)
         let image = NSImage(size: size)
         image.lockFocus()
         defer {
@@ -604,17 +604,17 @@ extension StatusItemController {
         }
 
         if let icon = ProviderBrandIcon.image(for: provider) {
-            let iconRect = NSRect(x: 1, y: 1, width: 16, height: 16)
+            let iconRect = NSRect(x: 1, y: 2, width: 18, height: 18)
             icon.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: 1)
             NSColor.black.setFill()
             iconRect.fill(using: .sourceIn)
         }
 
         let fillColor = self.wideProgressBarColor(hex: barColorHex)
-        let topRect = NSRect(x: 22, y: 10, width: 76, height: 6)
-        let bottomRect = NSRect(x: 22, y: 2, width: 76, height: 6)
-        let topPercentRect = NSRect(x: topRect.maxX + gap, y: 8, width: percentWidth, height: 10)
-        let bottomPercentRect = NSRect(x: bottomRect.maxX + gap, y: 0, width: percentWidth, height: 10)
+        let topRect = NSRect(x: 22, y: 13, width: 76, height: 6)
+        let bottomRect = NSRect(x: 22, y: 5, width: 76, height: 6)
+        let topPercentRect = NSRect(x: topRect.maxX + gap, y: 10, width: percentWidth, height: 12)
+        let bottomPercentRect = NSRect(x: bottomRect.maxX + gap, y: 0, width: percentWidth, height: 12)
         self.drawWideProgressBar(
             rect: topRect,
             window: sessionWindow,
@@ -644,7 +644,7 @@ extension StatusItemController {
 
         if statusIndicator.hasIssue {
             NSColor.systemRed.setFill()
-            NSBezierPath(ovalIn: NSRect(x: 13, y: 12, width: 5, height: 5)).fill()
+            NSBezierPath(ovalIn: NSRect(x: 15, y: 16, width: 5, height: 5)).fill()
         }
 
         return image

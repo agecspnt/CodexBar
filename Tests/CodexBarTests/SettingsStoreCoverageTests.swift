@@ -75,13 +75,13 @@ struct SettingsStoreCoverageTests {
         #expect(settings.menuBarWideProgressPercentGap == 0.1)
         settings.menuBarWideProgressPercentGap = 12
         #expect(settings.menuBarWideProgressPercentGap == 2)
-        #expect(settings.menuBarWideProgressPercentFontSize == 9.5)
+        #expect(settings.menuBarWideProgressPercentFontSize == 11.5)
         settings.menuBarWideProgressPercentFontSize = 7.5
         #expect(settings.menuBarWideProgressPercentFontSize == 7.5)
         settings.menuBarWideProgressPercentFontSize = 2
-        #expect(settings.menuBarWideProgressPercentFontSize == 6)
+        #expect(settings.menuBarWideProgressPercentFontSize == 7)
         settings.menuBarWideProgressPercentFontSize = 20
-        #expect(settings.menuBarWideProgressPercentFontSize == 9.5)
+        #expect(settings.menuBarWideProgressPercentFontSize == 11.5)
         #expect(settings.menuBarWideProgressBarColorHex == "#333333")
         settings.menuBarWideProgressBarColorHex = "111111"
         #expect(settings.menuBarWideProgressBarColorHex == "#111111")

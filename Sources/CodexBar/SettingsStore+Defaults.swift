@@ -212,7 +212,7 @@ extension SettingsStore {
     }
 
     static func sanitizedMenuBarWideProgressPercentFontSize(_ value: Double) -> Double {
-        min(9.5, max(6, value))
+        min(11.5, max(7, value))
     }
 
     var menuBarWideProgressBarColorHex: String {

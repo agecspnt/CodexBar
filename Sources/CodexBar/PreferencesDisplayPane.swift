@@ -101,7 +101,7 @@ struct DisplayPane: View {
                         HStack(spacing: 8) {
                             Slider(
                                 value: self.$settings.menuBarWideProgressPercentFontSize,
-                                in: 6...9.5,
+                                in: 7...11.5,
                                 step: 0.5)
                                 .frame(width: 120)
                             Text(String(format: "%.1f pt", self.settings.menuBarWideProgressPercentFontSize))

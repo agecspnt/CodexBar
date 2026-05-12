@@ -300,7 +300,7 @@ extension SettingsStore {
         let rawWideProgressPercentFontSize = userDefaults.object(
             forKey: "menuBarWideProgressPercentFontSize") as? Double
         let menuBarWideProgressPercentFontSize = Self.sanitizedMenuBarWideProgressPercentFontSize(
-            rawWideProgressPercentFontSize ?? 9.5)
+            rawWideProgressPercentFontSize ?? 11.5)
         let menuBarWideProgressBarColorHex = Self.sanitizedMenuBarWideProgressBarColorHex(
             userDefaults.string(forKey: "menuBarWideProgressBarColorHex"))
         let historicalTrackingEnabled = userDefaults.object(forKey: "historicalTrackingEnabled") as? Bool ?? false
