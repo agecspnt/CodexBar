@@ -68,14 +68,14 @@ struct SettingsStoreCoverageTests {
         #expect(settings.menuBarDisplayMode == .pace)
         settings.menuBarDisplayMode = .wideProgress
         #expect(settings.menuBarDisplayMode == .wideProgress)
-        #expect(settings.menuBarWideProgressPercentGap == 0.5)
+        #expect(settings.menuBarWideProgressPercentGap == 0.1)
         settings.menuBarWideProgressPercentGap = 1.4
         #expect(settings.menuBarWideProgressPercentGap == 1.4)
         settings.menuBarWideProgressPercentGap = 0
         #expect(settings.menuBarWideProgressPercentGap == 0.1)
         settings.menuBarWideProgressPercentGap = 12
         #expect(settings.menuBarWideProgressPercentGap == 2)
-        #expect(settings.menuBarWideProgressPercentFontSize == 11.5)
+        #expect(settings.menuBarWideProgressPercentFontSize == 10)
         settings.menuBarWideProgressPercentFontSize = 7.5
         #expect(settings.menuBarWideProgressPercentFontSize == 7.5)
         settings.menuBarWideProgressPercentFontSize = 2

@@ -585,8 +585,8 @@ extension StatusItemController {
         sessionWindow: RateWindow?,
         weeklyWindow: RateWindow?,
         paceText: String? = nil,
-        percentGap: Double = 0.5,
-        percentFontSize: Double = 11.5,
+        percentGap: Double = 0.1,
+        percentFontSize: Double = 10,
         barColorHex: String = "#333333",
         showUsed: Bool,
         statusIndicator: ProviderStatusIndicator = .none)
@@ -611,8 +611,8 @@ extension StatusItemController {
         }
 
         let fillColor = self.wideProgressBarColor(hex: barColorHex)
-        let topRect = NSRect(x: 22, y: 13, width: 76, height: 6)
-        let bottomRect = NSRect(x: 22, y: 5, width: 76, height: 6)
+        let topRect = NSRect(x: 22, y: 12.5, width: 76, height: 7)
+        let bottomRect = NSRect(x: 22, y: 2.5, width: 76, height: 7)
         let topPercentRect = NSRect(x: topRect.maxX + gap, y: 10, width: percentWidth, height: 12)
         let bottomPercentRect = NSRect(x: bottomRect.maxX + gap, y: 0, width: percentWidth, height: 12)
         self.drawWideProgressBar(
@@ -622,15 +622,19 @@ extension StatusItemController {
             fillAlpha: 1,
             showUsed: showUsed,
             label: "5h",
-            labelAlignment: .left)
+            labelAlignment: .left,
+            labelColor: .white,
+            markerColor: nil)
         self.drawWideProgressBar(
             rect: bottomRect,
             window: weeklyWindow,
             fillColor: fillColor,
             fillAlpha: 0.72,
             showUsed: showUsed,
-            label: paceText,
-            labelAlignment: .center)
+            label: paceText ?? "PACE",
+            labelAlignment: .center,
+            labelColor: .white,
+            markerColor: .systemRed)
         self.drawWideProgressPercent(
             rect: topPercentRect,
             window: sessionWindow,
@@ -657,7 +661,9 @@ extension StatusItemController {
         fillAlpha: CGFloat,
         showUsed: Bool,
         label: String?,
-        labelAlignment: NSTextAlignment)
+        labelAlignment: NSTextAlignment,
+        labelColor: NSColor,
+        markerColor: NSColor?)
     {
         let radius = rect.height / 2
         let trackPath = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
@@ -682,12 +688,16 @@ extension StatusItemController {
         trackPath.stroke()
 
         guard let label, !label.isEmpty else { return }
+        if let markerColor {
+            markerColor.setFill()
+            NSBezierPath(ovalIn: NSRect(x: rect.minX + 4, y: rect.midY - 1.5, width: 3, height: 3)).fill()
+        }
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = labelAlignment
         let labelRect = rect.insetBy(dx: 4, dy: -1)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedDigitSystemFont(ofSize: 6.5, weight: .semibold),
-            .foregroundColor: NSColor.labelColor.withAlphaComponent(0.92),
+            .foregroundColor: labelColor.withAlphaComponent(0.96),
             .paragraphStyle: paragraph,
         ]
         label.draw(in: labelRect, withAttributes: attributes)
@@ -701,7 +711,7 @@ extension StatusItemController {
     {
         guard let label = MenuBarDisplayText.percentText(window: window, showUsed: showUsed) else { return }
         let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = .right
+        paragraph.alignment = .left
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .semibold),
             .foregroundColor: NSColor.labelColor.withAlphaComponent(0.94),

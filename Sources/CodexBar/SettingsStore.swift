@@ -296,11 +296,11 @@ extension SettingsStore {
             ?? MenuBarDisplayMode.percent.rawValue
         let rawWideProgressPercentGap = userDefaults.object(forKey: "menuBarWideProgressPercentGap") as? Double
         let menuBarWideProgressPercentGap = Self.sanitizedMenuBarWideProgressPercentGap(
-            rawWideProgressPercentGap ?? 0.5)
+            rawWideProgressPercentGap ?? 0.1)
         let rawWideProgressPercentFontSize = userDefaults.object(
             forKey: "menuBarWideProgressPercentFontSize") as? Double
         let menuBarWideProgressPercentFontSize = Self.sanitizedMenuBarWideProgressPercentFontSize(
-            rawWideProgressPercentFontSize ?? 11.5)
+            rawWideProgressPercentFontSize ?? 10)
         let menuBarWideProgressBarColorHex = Self.sanitizedMenuBarWideProgressBarColorHex(
             userDefaults.string(forKey: "menuBarWideProgressBarColorHex"))
         let historicalTrackingEnabled = userDefaults.object(forKey: "historicalTrackingEnabled") as? Bool ?? false
