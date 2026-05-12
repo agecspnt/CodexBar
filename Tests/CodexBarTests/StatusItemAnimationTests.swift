@@ -904,10 +904,12 @@ struct StatusItemAnimationTests {
     func `wide progress image has stable menu bar size`() {
         let image = StatusItemController.makeWideProgressImage(
             provider: .codex,
-            window: RateWindow(usedPercent: 40, windowMinutes: nil, resetsAt: nil, resetDescription: nil),
+            sessionWindow: RateWindow(usedPercent: 40, windowMinutes: 300, resetsAt: nil, resetDescription: nil),
+            weeklyWindow: RateWindow(usedPercent: 62, windowMinutes: 7 * 24 * 60, resetsAt: nil, resetDescription: nil),
+            paceText: "+16%",
             showUsed: true)
 
-        #expect(image.size.width == 72)
+        #expect(image.size.width == 104)
         #expect(image.size.height == 18)
         #expect(image.isTemplate == false)
     }

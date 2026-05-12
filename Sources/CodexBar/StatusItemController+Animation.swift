@@ -315,17 +315,21 @@ extension StatusItemController {
         if showBrandPercent,
            let brand = ProviderBrandIcon.image(for: primaryProvider)
         {
-            let percentWindow = self.menuBarPercentWindow(for: primaryProvider, snapshot: snapshot)
             if self.settings.menuBarDisplayMode == .wideProgress {
+                let wideProgress = self.menuBarWideProgressModel(for: primaryProvider, snapshot: snapshot)
                 let progressImage = Self.makeWideProgressImage(
                     provider: primaryProvider,
-                    window: percentWindow,
+                    sessionWindow: wideProgress.sessionWindow,
+                    weeklyWindow: wideProgress.weeklyWindow,
+                    paceText: wideProgress.paceText,
                     showUsed: showUsed,
                     statusIndicator: statusIndicator)
                 let signature = [
                     "mode=wideProgress",
                     "provider=\(primaryProvider.rawValue)",
-                    "window=\(debugDouble(percentWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
+                    "session=\(debugDouble(wideProgress.sessionWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
+                    "weekly=\(debugDouble(wideProgress.weeklyWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
+                    "pace=\(wideProgress.paceText ?? "nil")",
                     "showUsed=\(showUsed ? "1" : "0")",
                     "status=\(statusIndicator.rawValue)",
                     "warningFlash=\(warningFlash ? "1" : "0")",
@@ -437,10 +441,12 @@ extension StatusItemController {
            let brand = ProviderBrandIcon.image(for: provider)
         {
             if self.settings.menuBarDisplayMode == .wideProgress {
-                let percentWindow = self.menuBarPercentWindow(for: provider, snapshot: snapshot)
+                let wideProgress = self.menuBarWideProgressModel(for: provider, snapshot: snapshot)
                 let image = Self.makeWideProgressImage(
                     provider: provider,
-                    window: percentWindow,
+                    sessionWindow: wideProgress.sessionWindow,
+                    weeklyWindow: wideProgress.weeklyWindow,
+                    paceText: wideProgress.paceText,
                     showUsed: showUsed,
                     statusIndicator: self.store.statusIndicator(for: provider))
                 self.setButtonImage(warningFlash ? Self.quotaWarningFlashImage(base: image) : image, for: button)
@@ -567,12 +573,14 @@ extension StatusItemController {
 
     static func makeWideProgressImage(
         provider: UsageProvider,
-        window: RateWindow?,
+        sessionWindow: RateWindow?,
+        weeklyWindow: RateWindow?,
+        paceText: String? = nil,
         showUsed: Bool,
         statusIndicator: ProviderStatusIndicator = .none)
         -> NSImage
     {
-        let size = NSSize(width: 72, height: 18)
+        let size = NSSize(width: 104, height: 18)
         let image = NSImage(size: size)
         image.lockFocus()
         defer {
@@ -580,42 +588,85 @@ extension StatusItemController {
             image.isTemplate = false
         }
 
-        let barRect = NSRect(x: 1, y: 4, width: size.width - 2, height: 10)
-        let radius: CGFloat = 5
-        let trackPath = NSBezierPath(roundedRect: barRect, xRadius: radius, yRadius: radius)
+        if let icon = ProviderBrandIcon.image(for: provider) {
+            NSColor.labelColor.set()
+            icon.draw(in: NSRect(x: 1, y: 1, width: 16, height: 16), from: .zero, operation: .sourceOver, fraction: 0.92)
+        }
+
+        let color = ProviderDescriptorRegistry.descriptor(for: provider).branding.color
+        let fillColor = NSColor(
+            calibratedRed: CGFloat(color.red),
+            green: CGFloat(color.green),
+            blue: CGFloat(color.blue),
+            alpha: 1)
+        let topRect = NSRect(x: 22, y: 10, width: 80, height: 6)
+        let bottomRect = NSRect(x: 22, y: 2, width: 80, height: 6)
+        self.drawWideProgressBar(
+            rect: topRect,
+            window: sessionWindow,
+            fillColor: fillColor,
+            fillAlpha: 1,
+            showUsed: showUsed,
+            label: "5h",
+            labelAlignment: .left)
+        self.drawWideProgressBar(
+            rect: bottomRect,
+            window: weeklyWindow,
+            fillColor: fillColor,
+            fillAlpha: 0.72,
+            showUsed: showUsed,
+            label: paceText,
+            labelAlignment: .right)
+
+        if statusIndicator.hasIssue {
+            NSColor.systemRed.setFill()
+            NSBezierPath(ovalIn: NSRect(x: 13, y: 12, width: 5, height: 5)).fill()
+        }
+
+        return image
+    }
+
+    private static func drawWideProgressBar(
+        rect: NSRect,
+        window: RateWindow?,
+        fillColor: NSColor,
+        fillAlpha: CGFloat,
+        showUsed: Bool,
+        label: String?,
+        labelAlignment: NSTextAlignment)
+    {
+        let radius = rect.height / 2
+        let trackPath = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
         NSColor.tertiaryLabelColor.withAlphaComponent(0.30).setFill()
         trackPath.fill()
 
         if let window {
             let rawPercent = showUsed ? window.usedPercent : window.remainingPercent
             let clampedPercent = max(0, min(100, rawPercent))
-            let fillWidth = barRect.width * CGFloat(clampedPercent / 100)
+            let fillWidth = rect.width * CGFloat(clampedPercent / 100)
             if fillWidth > 0 {
                 NSGraphicsContext.current?.saveGraphicsState()
                 trackPath.addClip()
-                let color = ProviderDescriptorRegistry.descriptor(for: provider).branding.color
-                NSColor(
-                    calibratedRed: CGFloat(color.red),
-                    green: CGFloat(color.green),
-                    blue: CGFloat(color.blue),
-                    alpha: 1)
-                    .setFill()
-                NSBezierPath(rect: NSRect(x: barRect.minX, y: barRect.minY, width: fillWidth, height: barRect.height))
-                    .fill()
+                fillColor.withAlphaComponent(fillAlpha).setFill()
+                NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY, width: fillWidth, height: rect.height)).fill()
                 NSGraphicsContext.current?.restoreGraphicsState()
             }
         }
 
-        NSColor.separatorColor.withAlphaComponent(0.55).setStroke()
-        trackPath.lineWidth = 1
+        NSColor.separatorColor.withAlphaComponent(0.45).setStroke()
+        trackPath.lineWidth = 0.75
         trackPath.stroke()
 
-        if statusIndicator.hasIssue {
-            NSColor.systemRed.setFill()
-            NSBezierPath(ovalIn: NSRect(x: size.width - 6, y: 12, width: 5, height: 5)).fill()
-        }
-
-        return image
+        guard let label, !label.isEmpty else { return }
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = labelAlignment
+        let labelRect = rect.insetBy(dx: 4, dy: -1)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 6.5, weight: .semibold),
+            .foregroundColor: NSColor.labelColor.withAlphaComponent(0.92),
+            .paragraphStyle: paragraph,
+        ]
+        label.draw(in: labelRect, withAttributes: attributes)
     }
 
     private func setButtonImage(_ image: NSImage, for button: NSStatusBarButton) {
@@ -769,6 +820,32 @@ extension StatusItemController {
 
     private func menuBarPercentWindow(for provider: UsageProvider, snapshot: UsageSnapshot?) -> RateWindow? {
         self.menuBarMetricWindow(for: provider, snapshot: snapshot)
+    }
+
+    private func menuBarWideProgressModel(
+        for provider: UsageProvider,
+        snapshot: UsageSnapshot?)
+        -> (sessionWindow: RateWindow?, weeklyWindow: RateWindow?, paceText: String?)
+    {
+        let now = snapshot?.updatedAt ?? Date()
+        let codexProjection = self.store.codexConsumerProjectionIfNeeded(
+            for: provider,
+            surface: .menuBar,
+            snapshotOverride: snapshot,
+            now: now)
+        let sessionWindow = codexProjection?.rateWindow(for: .session)
+            ?? self.menuBarPercentWindow(for: provider, snapshot: snapshot)
+        let weeklyWindow = codexProjection?.rateWindow(for: .weekly)
+            ?? snapshot?.secondary
+            // Abacus has no secondary window; pace is computed on primary monthly credits.
+            ?? (provider == .abacus ? snapshot?.primary : nil)
+        let pace = weeklyWindow.flatMap { window in
+            self.store.weeklyPace(provider: provider, window: window, now: now)
+        }
+        return (
+            sessionWindow: sessionWindow,
+            weeklyWindow: weeklyWindow,
+            paceText: MenuBarDisplayText.paceText(pace: pace))
     }
 
     private func primaryProviderForUnifiedIcon() -> UsageProvider {
