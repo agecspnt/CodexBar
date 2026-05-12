@@ -580,7 +580,7 @@ extension StatusItemController {
         statusIndicator: ProviderStatusIndicator = .none)
         -> NSImage
     {
-        let size = NSSize(width: 104, height: 18)
+        let size = NSSize(width: 134, height: 18)
         let image = NSImage(size: size)
         image.lockFocus()
         defer {
@@ -589,8 +589,10 @@ extension StatusItemController {
         }
 
         if let icon = ProviderBrandIcon.image(for: provider) {
-            NSColor.labelColor.set()
-            icon.draw(in: NSRect(x: 1, y: 1, width: 16, height: 16), from: .zero, operation: .sourceOver, fraction: 0.92)
+            let iconRect = NSRect(x: 1, y: 1, width: 16, height: 16)
+            icon.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: 1)
+            NSColor.black.setFill()
+            iconRect.fill(using: .sourceIn)
         }
 
         let color = ProviderDescriptorRegistry.descriptor(for: provider).branding.color
@@ -599,8 +601,10 @@ extension StatusItemController {
             green: CGFloat(color.green),
             blue: CGFloat(color.blue),
             alpha: 1)
-        let topRect = NSRect(x: 22, y: 10, width: 80, height: 6)
-        let bottomRect = NSRect(x: 22, y: 2, width: 80, height: 6)
+        let topRect = NSRect(x: 22, y: 10, width: 76, height: 6)
+        let bottomRect = NSRect(x: 22, y: 2, width: 76, height: 6)
+        let topPercentRect = NSRect(x: 103, y: 8, width: 30, height: 10)
+        let bottomPercentRect = NSRect(x: 103, y: 0, width: 30, height: 10)
         self.drawWideProgressBar(
             rect: topRect,
             window: sessionWindow,
@@ -616,7 +620,15 @@ extension StatusItemController {
             fillAlpha: 0.72,
             showUsed: showUsed,
             label: paceText,
-            labelAlignment: .right)
+            labelAlignment: .center)
+        self.drawWideProgressPercent(
+            rect: topPercentRect,
+            window: sessionWindow,
+            showUsed: showUsed)
+        self.drawWideProgressPercent(
+            rect: bottomPercentRect,
+            window: weeklyWindow,
+            showUsed: showUsed)
 
         if statusIndicator.hasIssue {
             NSColor.systemRed.setFill()
@@ -667,6 +679,18 @@ extension StatusItemController {
             .paragraphStyle: paragraph,
         ]
         label.draw(in: labelRect, withAttributes: attributes)
+    }
+
+    private static func drawWideProgressPercent(rect: NSRect, window: RateWindow?, showUsed: Bool) {
+        guard let label = MenuBarDisplayText.percentText(window: window, showUsed: showUsed) else { return }
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .right
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 7.5, weight: .semibold),
+            .foregroundColor: NSColor.labelColor.withAlphaComponent(0.94),
+            .paragraphStyle: paragraph,
+        ]
+        label.draw(in: rect, withAttributes: attributes)
     }
 
     private func setButtonImage(_ image: NSImage, for button: NSStatusBarButton) {
