@@ -888,10 +888,28 @@ struct StatusItemAnimationTests {
             percentWindow: percentWindow,
             pace: paceValue,
             showUsed: true)
+        let wideProgress = MenuBarDisplayText.displayText(
+            mode: .wideProgress,
+            percentWindow: percentWindow,
+            pace: paceValue,
+            showUsed: true)
 
         #expect(percent == "40%")
         #expect(pace == "+16%")
         #expect(both == "40% · +16%")
+        #expect(wideProgress == nil)
+    }
+
+    @Test
+    func `wide progress image has stable menu bar size`() {
+        let image = StatusItemController.makeWideProgressImage(
+            provider: .codex,
+            window: RateWindow(usedPercent: 40, windowMinutes: nil, resetsAt: nil, resetDescription: nil),
+            showUsed: true)
+
+        #expect(image.size.width == 72)
+        #expect(image.size.height == 18)
+        #expect(image.isTemplate == false)
     }
 
     @Test

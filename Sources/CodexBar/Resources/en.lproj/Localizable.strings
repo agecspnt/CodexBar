@@ -601,9 +601,11 @@
 "display_mode_percent" = "Percent";
 "display_mode_pace" = "Pace";
 "display_mode_both" = "Both";
+"display_mode_wide_progress" = "Wide progress bar";
 "display_mode_percent_desc" = "Show remaining/used percentage (e.g. 45%)";
 "display_mode_pace_desc" = "Show pace indicator (e.g. +5%)";
 "display_mode_both_desc" = "Show both percentage and pace (e.g. 45% · +5%)";
+"display_mode_wide_progress_desc" = "Show a wider menu bar progress bar";
 
 /* Provider status */
 "status_operational" = "Operational";

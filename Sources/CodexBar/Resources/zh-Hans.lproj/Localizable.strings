@@ -608,9 +608,11 @@
 "display_mode_percent" = "百分比";
 "display_mode_pace" = "节奏";
 "display_mode_both" = "两者";
+"display_mode_wide_progress" = "宽进度条";
 "display_mode_percent_desc" = "显示剩余/已使用百分比（例如 45%）";
 "display_mode_pace_desc" = "显示节奏指示器（例如 +5%）";
 "display_mode_both_desc" = "同时显示百分比和节奏（例如 45% · +5%）";
+"display_mode_wide_progress_desc" = "在菜单栏显示更宽的进度条";
 
 /* Provider status */
 "status_operational" = "正常运行";

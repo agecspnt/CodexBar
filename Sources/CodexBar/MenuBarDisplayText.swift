@@ -32,6 +32,8 @@ enum MenuBarDisplayText {
             // Fall back to percent-only when pace is unavailable (e.g. Copilot)
             guard let paceText = Self.paceText(pace: pace) else { return percent }
             return "\(percent) · \(paceText)"
+        case .wideProgress:
+            return nil
         }
     }
 }

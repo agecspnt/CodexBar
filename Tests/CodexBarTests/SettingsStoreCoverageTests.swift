@@ -66,6 +66,8 @@ struct SettingsStoreCoverageTests {
 
         settings.menuBarDisplayMode = .pace
         #expect(settings.menuBarDisplayMode == .pace)
+        settings.menuBarDisplayMode = .wideProgress
+        #expect(settings.menuBarDisplayMode == .wideProgress)
         #expect(settings.historicalTrackingEnabled == false)
         settings.historicalTrackingEnabled = true
         #expect(settings.historicalTrackingEnabled == true)

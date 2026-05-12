@@ -5,6 +5,7 @@ enum MenuBarDisplayMode: String, CaseIterable, Identifiable {
     case percent
     case pace
     case both
+    case wideProgress
 
     var id: String {
         self.rawValue
@@ -15,6 +16,7 @@ enum MenuBarDisplayMode: String, CaseIterable, Identifiable {
         case .percent: L("display_mode_percent")
         case .pace: L("display_mode_pace")
         case .both: L("display_mode_both")
+        case .wideProgress: L("display_mode_wide_progress")
         }
     }
 
@@ -23,6 +25,7 @@ enum MenuBarDisplayMode: String, CaseIterable, Identifiable {
         case .percent: L("display_mode_percent_desc")
         case .pace: L("display_mode_pace_desc")
         case .both: L("display_mode_both_desc")
+        case .wideProgress: L("display_mode_wide_progress_desc")
         }
     }
 }
