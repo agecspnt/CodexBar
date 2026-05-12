@@ -12,6 +12,7 @@ APP_NAME="CodexBar"
 ARTIFACT_PREFIX="CodexBar-"
 BUNDLE_ID="com.steipete.codexbar"
 TAG="v${MARKETING_VERSION}"
+FEED_URL="${CODEXBAR_FEED_URL:-https://raw.githubusercontent.com/agecspnt/CodexBar/main/appcast.xml}"
 
 err() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -47,7 +48,7 @@ gh release create "$TAG" ${APP_NAME}-${MARKETING_VERSION}.zip ${APP_NAME}-${MARK
 SPARKLE_PRIVATE_KEY_FILE="$KEY_FILE" \
   "$ROOT/Scripts/make_appcast.sh" \
   "${APP_NAME}-${MARKETING_VERSION}.zip" \
-  "https://raw.githubusercontent.com/steipete/CodexBar/main/appcast.xml"
+  "$FEED_URL"
 
 verify_appcast_entry "$APPCAST" "$MARKETING_VERSION" "$KEY_FILE"
 
