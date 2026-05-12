@@ -20,6 +20,7 @@ struct SettingsDefaultsState {
     var resetTimesShowAbsolute: Bool
     var menuBarShowsBrandIconWithPercent: Bool
     var menuBarDisplayModeRaw: String?
+    var menuBarWideProgressPercentGap: Double
     var historicalTrackingEnabled: Bool
     var multiAccountMenuLayoutRaw: String
     var menuBarMetricPreferencesRaw: [String: String]

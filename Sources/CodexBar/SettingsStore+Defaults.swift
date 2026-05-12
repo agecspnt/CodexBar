@@ -189,6 +189,19 @@ extension SettingsStore {
         set { self.menuBarDisplayModeRaw = newValue.rawValue }
     }
 
+    var menuBarWideProgressPercentGap: Double {
+        get { self.defaultsState.menuBarWideProgressPercentGap }
+        set {
+            let sanitized = Self.sanitizedMenuBarWideProgressPercentGap(newValue)
+            self.defaultsState.menuBarWideProgressPercentGap = sanitized
+            self.userDefaults.set(sanitized, forKey: "menuBarWideProgressPercentGap")
+        }
+    }
+
+    static func sanitizedMenuBarWideProgressPercentGap(_ value: Double) -> Double {
+        min(10, max(0, value))
+    }
+
     var multiAccountMenuLayout: MultiAccountMenuLayout {
         get { MultiAccountMenuLayout(rawValue: self.defaultsState.multiAccountMenuLayoutRaw) ?? .segmented }
         set {

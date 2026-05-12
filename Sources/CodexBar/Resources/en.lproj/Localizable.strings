@@ -479,6 +479,8 @@
 "menu_bar_shows_percent_subtitle" = "Replace critter bars with provider branding icons and a percentage.";
 "display_mode_title" = "Display mode";
 "display_mode_subtitle" = "Choose what to show in the menu bar (Pace shows usage vs. expected).";
+"wide_progress_gap_title" = "Wide progress gap";
+"wide_progress_gap_subtitle" = "Adjust spacing between the progress bars and their percentages.";
 "section_menu_content" = "Menu content";
 "show_usage_as_used_title" = "Show usage as used";
 "show_usage_as_used_subtitle" = "Progress bars fill as you consume quota (instead of showing remaining).";

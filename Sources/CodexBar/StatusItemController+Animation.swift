@@ -322,6 +322,7 @@ extension StatusItemController {
                     sessionWindow: wideProgress.sessionWindow,
                     weeklyWindow: wideProgress.weeklyWindow,
                     paceText: wideProgress.paceText,
+                    percentGap: self.settings.menuBarWideProgressPercentGap,
                     showUsed: showUsed,
                     statusIndicator: statusIndicator)
                 let signature = [
@@ -330,6 +331,7 @@ extension StatusItemController {
                     "session=\(debugDouble(wideProgress.sessionWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
                     "weekly=\(debugDouble(wideProgress.weeklyWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
                     "pace=\(wideProgress.paceText ?? "nil")",
+                    "gap=\(self.settings.menuBarWideProgressPercentGap)",
                     "showUsed=\(showUsed ? "1" : "0")",
                     "status=\(statusIndicator.rawValue)",
                     "warningFlash=\(warningFlash ? "1" : "0")",
@@ -447,6 +449,7 @@ extension StatusItemController {
                     sessionWindow: wideProgress.sessionWindow,
                     weeklyWindow: wideProgress.weeklyWindow,
                     paceText: wideProgress.paceText,
+                    percentGap: self.settings.menuBarWideProgressPercentGap,
                     showUsed: showUsed,
                     statusIndicator: self.store.statusIndicator(for: provider))
                 self.setButtonImage(warningFlash ? Self.quotaWarningFlashImage(base: image) : image, for: button)
@@ -576,11 +579,14 @@ extension StatusItemController {
         sessionWindow: RateWindow?,
         weeklyWindow: RateWindow?,
         paceText: String? = nil,
+        percentGap: Double = 2,
         showUsed: Bool,
         statusIndicator: ProviderStatusIndicator = .none)
         -> NSImage
     {
-        let size = NSSize(width: 134, height: 18)
+        let percentWidth: CGFloat = 30
+        let gap = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentGap(percentGap))
+        let size = NSSize(width: 22 + 76 + gap + percentWidth + 1, height: 18)
         let image = NSImage(size: size)
         image.lockFocus()
         defer {
@@ -603,8 +609,8 @@ extension StatusItemController {
             alpha: 1)
         let topRect = NSRect(x: 22, y: 10, width: 76, height: 6)
         let bottomRect = NSRect(x: 22, y: 2, width: 76, height: 6)
-        let topPercentRect = NSRect(x: 103, y: 8, width: 30, height: 10)
-        let bottomPercentRect = NSRect(x: 103, y: 0, width: 30, height: 10)
+        let topPercentRect = NSRect(x: topRect.maxX + gap, y: 8, width: percentWidth, height: 10)
+        let bottomPercentRect = NSRect(x: bottomRect.maxX + gap, y: 0, width: percentWidth, height: 10)
         self.drawWideProgressBar(
             rect: topRect,
             window: sessionWindow,

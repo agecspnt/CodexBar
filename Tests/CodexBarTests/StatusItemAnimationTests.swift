@@ -909,7 +909,7 @@ struct StatusItemAnimationTests {
             paceText: "+16%",
             showUsed: true)
 
-        #expect(image.size.width == 134)
+        #expect(image.size.width == 131)
         #expect(image.size.height == 18)
         #expect(image.isTemplate == false)
     }

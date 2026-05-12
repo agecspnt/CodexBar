@@ -61,6 +61,33 @@ struct DisplayPane: View {
                     }
                     .disabled(!self.settings.menuBarShowsBrandIconWithPercent)
                     .opacity(self.settings.menuBarShowsBrandIconWithPercent ? 1 : 0.5)
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L("wide_progress_gap_title"))
+                                .font(.body)
+                            Text(L("wide_progress_gap_subtitle"))
+                                .font(.footnote)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        HStack(spacing: 8) {
+                            Slider(
+                                value: self.$settings.menuBarWideProgressPercentGap,
+                                in: 0...10,
+                                step: 1)
+                                .frame(width: 120)
+                            Text(String(format: "%.0f pt", self.settings.menuBarWideProgressPercentGap))
+                                .font(.footnote.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                                .frame(width: 38, alignment: .trailing)
+                        }
+                    }
+                    .disabled(
+                        !self.settings.menuBarShowsBrandIconWithPercent
+                            || self.settings.menuBarDisplayMode != .wideProgress)
+                    .opacity(
+                        self.settings.menuBarShowsBrandIconWithPercent
+                            && self.settings.menuBarDisplayMode == .wideProgress ? 1 : 0.5)
                 }
 
                 Divider()
