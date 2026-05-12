@@ -706,13 +706,16 @@ extension StatusItemController {
             }
         }
 
+        if let pacePercent, let paceOnTop {
+            NSGraphicsContext.current?.saveGraphicsState()
+            trackPath.addClip()
+            self.drawWideProgressPaceMarker(rect: rect, pacePercent: pacePercent, paceOnTop: paceOnTop)
+            NSGraphicsContext.current?.restoreGraphicsState()
+        }
+
         NSColor.separatorColor.withAlphaComponent(0.45).setStroke()
         trackPath.lineWidth = 0.75
         trackPath.stroke()
-
-        if let pacePercent, let paceOnTop {
-            self.drawWideProgressPaceMarker(rect: rect, pacePercent: pacePercent, paceOnTop: paceOnTop)
-        }
 
         guard let label, !label.isEmpty else { return }
         if let markerColor {
@@ -743,7 +746,7 @@ extension StatusItemController {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .left
         return [
-            .font: NSFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .semibold),
+            .font: NSFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .regular),
             .foregroundColor: NSColor.labelColor.withAlphaComponent(0.94),
             .paragraphStyle: paragraph,
         ]
@@ -751,11 +754,14 @@ extension StatusItemController {
 
     private static func drawWideProgressPaceMarker(rect: NSRect, pacePercent: Double, paceOnTop: Bool) {
         let clamped = min(100, max(0, pacePercent))
-        let x = rect.minX + rect.width * CGFloat(clamped / 100)
-        let markerWidth: CGFloat = 2
-        let markerRect = NSRect(x: x - markerWidth / 2, y: rect.minY, width: markerWidth, height: rect.height)
+        let paceWidth = rect.width * CGFloat(clamped / 100)
+        let stripeWidth: CGFloat = 2
+        let punchWidth = stripeWidth * 3
+        let x = rect.minX + paceWidth
+        let punchRect = NSRect(x: x - punchWidth / 2, y: rect.minY, width: punchWidth, height: rect.height)
+        let markerRect = NSRect(x: x - stripeWidth / 2, y: rect.minY, width: stripeWidth, height: rect.height)
         NSColor.white.withAlphaComponent(0.85).setFill()
-        NSBezierPath(rect: markerRect.insetBy(dx: -1, dy: 0)).fill()
+        NSBezierPath(rect: punchRect).fill()
         (paceOnTop ? NSColor.systemGreen : NSColor.systemRed).setFill()
         NSBezierPath(rect: markerRect).fill()
     }
