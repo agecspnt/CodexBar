@@ -73,13 +73,13 @@ struct DisplayPane: View {
                         HStack(spacing: 8) {
                             Slider(
                                 value: self.$settings.menuBarWideProgressPercentGap,
-                                in: 0...10,
-                                step: 1)
+                                in: 0.1...2,
+                                step: 0.1)
                                 .frame(width: 120)
-                            Text(String(format: "%.0f pt", self.settings.menuBarWideProgressPercentGap))
+                            Text(String(format: "%.1f pt", self.settings.menuBarWideProgressPercentGap))
                                 .font(.footnote.monospacedDigit())
                                 .foregroundStyle(.secondary)
-                                .frame(width: 38, alignment: .trailing)
+                                .frame(width: 44, alignment: .trailing)
                         }
                     }
                     .disabled(

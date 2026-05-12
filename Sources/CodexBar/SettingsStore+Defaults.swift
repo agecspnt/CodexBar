@@ -199,7 +199,7 @@ extension SettingsStore {
     }
 
     static func sanitizedMenuBarWideProgressPercentGap(_ value: Double) -> Double {
-        min(10, max(0, value))
+        min(2, max(0.1, value))
     }
 
     var multiAccountMenuLayout: MultiAccountMenuLayout {
