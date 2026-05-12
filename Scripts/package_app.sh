@@ -25,6 +25,7 @@ fi
 
 # Build for host architecture by default; allow overriding via ARCHES (e.g., "arm64 x86_64" for universal).
 ARCH_LIST=( ${ARCHES:-} )
+EXTRA_SWIFT_BUILD_ARGS=( ${CODEXBAR_EXTRA_SWIFT_BUILD_ARGS:-} )
 if [[ ${#ARCH_LIST[@]} -eq 0 ]]; then
   HOST_ARCH=$(uname -m)
   case "$HOST_ARCH" in
@@ -129,7 +130,14 @@ generate_widget_appintents_metadata() {
   dependency_metadata="$build_dir/CodexBarWidget.DependencyMetadataFileList"
   static_dependency_metadata="$build_dir/CodexBarWidget.DependencyStaticMetadataFileList"
 
-  appintents_tool=$(xcrun --find appintentsmetadataprocessor)
+  if ! appintents_tool=$(xcrun --find appintentsmetadataprocessor 2>/dev/null); then
+    if [[ "${SIGNING_MODE:-}" == "adhoc" || "${CODEXBAR_ALLOW_MISSING_WIDGET_METADATA:-0}" == "1" ]]; then
+      echo "WARN: appintentsmetadataprocessor not found; continuing without widget App Intents metadata." >&2
+      return 0
+    fi
+    echo "ERROR: appintentsmetadataprocessor not found." >&2
+    exit 1
+  fi
   sdk_root=$(xcrun --sdk macosx --show-sdk-path)
   swiftc_path=$(xcrun --find swiftc)
   toolchain_dir=$(dirname "$(dirname "$(dirname "$swiftc_path")")")
@@ -207,12 +215,12 @@ generate_widget_appintents_metadata() {
 
 KEYBOARD_SHORTCUTS_UTIL="$ROOT/.build/checkouts/KeyboardShortcuts/Sources/KeyboardShortcuts/Utilities.swift"
 if [[ ! -f "$KEYBOARD_SHORTCUTS_UTIL" ]]; then
-  swift build -c "$CONF" --arch "${ARCH_LIST[0]}"
+  swift build -c "$CONF" --arch "${ARCH_LIST[0]}" "${EXTRA_SWIFT_BUILD_ARGS[@]}"
 fi
 patch_keyboard_shortcuts
 
 for ARCH in "${ARCH_LIST[@]}"; do
-  swift build -c "$CONF" --arch "$ARCH"
+  swift build -c "$CONF" --arch "$ARCH" "${EXTRA_SWIFT_BUILD_ARGS[@]}"
 done
 
 APP="$ROOT/CodexBar.app"
@@ -236,7 +244,7 @@ if [[ "$LOWER_CONF" == "debug" ]]; then
   FEED_URL=""
   AUTO_CHECKS=false
 fi
-if [[ "$SIGNING_MODE" == "adhoc" ]]; then
+if [[ "$SIGNING_MODE" == "adhoc" && "${CODEXBAR_KEEP_SPARKLE_FOR_ADHOC:-0}" != "1" ]]; then
   FEED_URL=""
   AUTO_CHECKS=false
 fi
