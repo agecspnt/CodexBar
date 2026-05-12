@@ -321,7 +321,8 @@ extension StatusItemController {
                     provider: primaryProvider,
                     sessionWindow: wideProgress.sessionWindow,
                     weeklyWindow: wideProgress.weeklyWindow,
-                    paceText: wideProgress.paceText,
+                    pacePercent: wideProgress.pacePercent,
+                    paceOnTop: wideProgress.paceOnTop,
                     percentGap: self.settings.menuBarWideProgressPercentGap,
                     percentFontSize: self.settings.menuBarWideProgressPercentFontSize,
                     barColorHex: self.settings.menuBarWideProgressBarColorHex,
@@ -332,7 +333,8 @@ extension StatusItemController {
                     "provider=\(primaryProvider.rawValue)",
                     "session=\(debugDouble(wideProgress.sessionWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
                     "weekly=\(debugDouble(wideProgress.weeklyWindow.map { showUsed ? $0.usedPercent : $0.remainingPercent }))",
-                    "pace=\(wideProgress.paceText ?? "nil")",
+                    "pace=\(debugDouble(wideProgress.pacePercent))",
+                    "paceOnTop=\(wideProgress.paceOnTop.map { $0 ? "1" : "0" } ?? "nil")",
                     "gap=\(self.settings.menuBarWideProgressPercentGap)",
                     "font=\(self.settings.menuBarWideProgressPercentFontSize)",
                     "barColor=\(self.settings.menuBarWideProgressBarColorHex)",
@@ -452,7 +454,8 @@ extension StatusItemController {
                     provider: provider,
                     sessionWindow: wideProgress.sessionWindow,
                     weeklyWindow: wideProgress.weeklyWindow,
-                    paceText: wideProgress.paceText,
+                    pacePercent: wideProgress.pacePercent,
+                    paceOnTop: wideProgress.paceOnTop,
                     percentGap: self.settings.menuBarWideProgressPercentGap,
                     percentFontSize: self.settings.menuBarWideProgressPercentFontSize,
                     barColorHex: self.settings.menuBarWideProgressBarColorHex,
@@ -584,7 +587,8 @@ extension StatusItemController {
         provider: UsageProvider,
         sessionWindow: RateWindow?,
         weeklyWindow: RateWindow?,
-        paceText: String? = nil,
+        pacePercent: Double? = nil,
+        paceOnTop: Bool? = nil,
         percentGap: Double = 0.1,
         percentFontSize: Double = 10,
         barColorHex: String = "#333333",
@@ -593,7 +597,14 @@ extension StatusItemController {
         -> NSImage
     {
         let fontSize = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentFontSize(percentFontSize))
-        let percentWidth = max(CGFloat(34), ceil(fontSize * 3.9))
+        let percentAttributes = self.wideProgressPercentAttributes(fontSize: fontSize)
+        let topPercentText = MenuBarDisplayText.percentText(window: sessionWindow, showUsed: showUsed)
+        let bottomPercentText = MenuBarDisplayText.percentText(window: weeklyWindow, showUsed: showUsed)
+        let measuredPercentWidth = [topPercentText, bottomPercentText]
+            .compactMap { $0 }
+            .map { ceil(($0 as NSString).size(withAttributes: percentAttributes).width) }
+            .max() ?? 0
+        let percentWidth = measuredPercentWidth > 0 ? measuredPercentWidth + 1 : 0
         let gap = CGFloat(SettingsStore.sanitizedMenuBarWideProgressPercentGap(percentGap))
         let size = NSSize(width: 22 + 76 + gap + percentWidth + 1, height: 22)
         let image = NSImage(size: size)
@@ -624,6 +635,8 @@ extension StatusItemController {
             label: "5h",
             labelAlignment: .left,
             labelColor: .white,
+            pacePercent: nil,
+            paceOnTop: nil,
             markerColor: nil)
         self.drawWideProgressBar(
             rect: bottomRect,
@@ -631,19 +644,19 @@ extension StatusItemController {
             fillColor: fillColor,
             fillAlpha: 0.72,
             showUsed: showUsed,
-            label: paceText ?? "PACE",
+            label: nil,
             labelAlignment: .center,
             labelColor: .white,
-            markerColor: .systemRed)
+            pacePercent: pacePercent,
+            paceOnTop: paceOnTop,
+            markerColor: nil)
         self.drawWideProgressPercent(
             rect: topPercentRect,
-            window: sessionWindow,
-            showUsed: showUsed,
+            label: topPercentText,
             fontSize: fontSize)
         self.drawWideProgressPercent(
             rect: bottomPercentRect,
-            window: weeklyWindow,
-            showUsed: showUsed,
+            label: bottomPercentText,
             fontSize: fontSize)
 
         if statusIndicator.hasIssue {
@@ -663,6 +676,8 @@ extension StatusItemController {
         label: String?,
         labelAlignment: NSTextAlignment,
         labelColor: NSColor,
+        pacePercent: Double?,
+        paceOnTop: Bool?,
         markerColor: NSColor?)
     {
         let radius = rect.height / 2
@@ -687,6 +702,10 @@ extension StatusItemController {
         trackPath.lineWidth = 0.75
         trackPath.stroke()
 
+        if let pacePercent, let paceOnTop {
+            self.drawWideProgressPaceMarker(rect: rect, pacePercent: pacePercent, paceOnTop: paceOnTop)
+        }
+
         guard let label, !label.isEmpty else { return }
         if let markerColor {
             markerColor.setFill()
@@ -705,19 +724,32 @@ extension StatusItemController {
 
     private static func drawWideProgressPercent(
         rect: NSRect,
-        window: RateWindow?,
-        showUsed: Bool,
+        label: String?,
         fontSize: CGFloat)
     {
-        guard let label = MenuBarDisplayText.percentText(window: window, showUsed: showUsed) else { return }
+        guard let label else { return }
+        label.draw(in: rect, withAttributes: self.wideProgressPercentAttributes(fontSize: fontSize))
+    }
+
+    private static func wideProgressPercentAttributes(fontSize: CGFloat) -> [NSAttributedString.Key: Any] {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .left
-        let attributes: [NSAttributedString.Key: Any] = [
+        return [
             .font: NSFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .semibold),
             .foregroundColor: NSColor.labelColor.withAlphaComponent(0.94),
             .paragraphStyle: paragraph,
         ]
-        label.draw(in: rect, withAttributes: attributes)
+    }
+
+    private static func drawWideProgressPaceMarker(rect: NSRect, pacePercent: Double, paceOnTop: Bool) {
+        let clamped = min(100, max(0, pacePercent))
+        let x = rect.minX + rect.width * CGFloat(clamped / 100)
+        let markerWidth: CGFloat = 2
+        let markerRect = NSRect(x: x - markerWidth / 2, y: rect.minY, width: markerWidth, height: rect.height)
+        NSColor.white.withAlphaComponent(0.85).setFill()
+        NSBezierPath(rect: markerRect.insetBy(dx: -1, dy: 0)).fill()
+        (paceOnTop ? NSColor.systemGreen : NSColor.systemRed).setFill()
+        NSBezierPath(rect: markerRect).fill()
     }
 
     private static func wideProgressBarColor(hex: String) -> NSColor {
@@ -887,7 +919,7 @@ extension StatusItemController {
     private func menuBarWideProgressModel(
         for provider: UsageProvider,
         snapshot: UsageSnapshot?)
-        -> (sessionWindow: RateWindow?, weeklyWindow: RateWindow?, paceText: String?)
+        -> (sessionWindow: RateWindow?, weeklyWindow: RateWindow?, pacePercent: Double?, paceOnTop: Bool?)
     {
         let now = snapshot?.updatedAt ?? Date()
         let codexProjection = self.store.codexConsumerProjectionIfNeeded(
@@ -904,10 +936,18 @@ extension StatusItemController {
         let pace = weeklyWindow.flatMap { window in
             self.store.weeklyPace(provider: provider, window: window, now: now)
         }
+        let paceDetail = weeklyWindow.flatMap { window in
+            UsageMenuCardView.Model.weeklyPaceDetail(
+                window: window,
+                now: now,
+                pace: pace,
+                showUsed: self.settings.usageBarsShowUsed)
+        }
         return (
             sessionWindow: sessionWindow,
             weeklyWindow: weeklyWindow,
-            paceText: MenuBarDisplayText.paceText(pace: pace))
+            pacePercent: paceDetail?.pacePercent,
+            paceOnTop: paceDetail?.paceOnTop)
     }
 
     private func primaryProviderForUnifiedIcon() -> UsageProvider {
