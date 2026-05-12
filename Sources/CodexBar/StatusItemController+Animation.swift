@@ -756,12 +756,8 @@ extension StatusItemController {
         let clamped = min(100, max(0, pacePercent))
         let paceWidth = rect.width * CGFloat(clamped / 100)
         let stripeWidth: CGFloat = 2
-        let punchWidth = stripeWidth * 3
         let x = rect.minX + paceWidth
-        let punchRect = NSRect(x: x - punchWidth / 2, y: rect.minY, width: punchWidth, height: rect.height)
         let markerRect = NSRect(x: x - stripeWidth / 2, y: rect.minY, width: stripeWidth, height: rect.height)
-        NSColor.white.withAlphaComponent(0.85).setFill()
-        NSBezierPath(rect: punchRect).fill()
         (paceOnTop ? NSColor.systemGreen : NSColor.systemRed).setFill()
         NSBezierPath(rect: markerRect).fill()
     }
